@@ -9,8 +9,8 @@ library ContinuousTokenLibrary {
     uint256 private constant RESERVE_RATIO = 0.3333e18; // 1/n
     uint256 private constant SLOPE = 0.003e18;
     uint256 private constant SCALE = 1e18;
+    uint256 private constant ONE = SCALE;
     uint256 private constant CONTINOUS_INCREASE_RATE = 3; // continous token increase rate n + 1
-    uint internal constant MINIMUM_AMOUNT_VALUE = 10**10;
 
     /**
         @dev given a token supply, reserve, CRR and a deposit amount (in the reserve token), calculates the return for a given change (in the main token)
@@ -30,7 +30,6 @@ library ContinuousTokenLibrary {
         uint256 _depositAmount
     ) internal pure returns (uint256) {
         // validate input
-        require(_depositAmount >= MINIMUM_AMOUNT_VALUE, "Invalid amount extered: p");
         require(
             _supply > 0 && _reserveBalance > 0,
             "Incorrect input parameters"
@@ -63,7 +62,6 @@ library ContinuousTokenLibrary {
         uint256 _supply,
         uint256 _depositAmount
     ) internal pure returns (uint256) {
-        require(_depositAmount >= MINIMUM_AMOUNT_VALUE, "Invalid amount extered: p");
         if (_depositAmount == 0) return 0;
 
         // this is the same as (((n+1) * _depositAmount) / SLOPE) + _supply ^ (n+1)
@@ -94,12 +92,10 @@ library ContinuousTokenLibrary {
         uint256 _sellAmount
     ) internal pure returns (uint256) {
         // validate input
-        require(_sellAmount >= MINIMUM_AMOUNT_VALUE, "Invalid amount extered: p");
         require(
             _supply > 0 &&
-                _reserveBalance > 0 &&
-                _sellAmount >= MINIMUM_AMOUNT_VALUE &&
-                _sellAmount <= _supply, "incorrect input parameter"
+            _reserveBalance > 0 &&
+            _sellAmount <= _supply, "incorrect input parameter"
         );
 
         // special case for 0 sell amount
@@ -113,13 +109,12 @@ library ContinuousTokenLibrary {
         }
 
         UD60x18 term1 = ud(
-            ((1 * SCALE) - (_sellAmount * SCALE) / _supply) * SCALE
+            (ONE - (_sellAmount * SCALE) / _supply)
         );
-        uint256 term2 = (((1 * SCALE) * SCALE) / RESERVE_RATIO);
+        uint256 term2 = (ONE * SCALE) / RESERVE_RATIO;
         uint256 term3 = intoUint256(term1.pow(ud(term2)));
-        uint256 term4 = (((1 * SCALE) * SCALE) - term3) / SCALE;
-        uint256 term5 = _reserveBalance.mul(term4);
+        uint256 term4 = _reserveBalance.mul(ONE - term3);
 
-        return term5.div(SCALE);
+        return term4.div(SCALE);
     }
 }

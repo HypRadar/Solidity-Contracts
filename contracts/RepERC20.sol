@@ -24,7 +24,7 @@ contract RepERC20 is ERC20, IRepERC20 {
     modifier ensureProjectAddress(address txSender) {
         require(
             projectAddress == txSender,
-            "RepERC20: Incorrect priviledge"
+            "RepERC20: Incorrect privilege"
         );
         _;
     }

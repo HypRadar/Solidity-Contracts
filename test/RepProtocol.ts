@@ -50,6 +50,35 @@ describe("HypRepProtocol", function () {
           .createRep("FAT-REP", community.address, 1000, { value: projectCreationFeeEther})).to.be.rejectedWith("You have created a REP with this Ticker before");
     });
 
-    
+    it("Project creates token and tokens get traded", async function () {
+      let receipt;
+      let tx;
+      const deadline = ((await time.latest()) + 100).toString();
+      const { repFactory, owner, community, alice, bob, carol, david, erin, projectCreationFeeEther } =
+        await loadFixture(deployRepFixtures);
+
+      const factory = await repFactory
+        .connect(community)
+        .createRep("FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
+
+      const repERC20Address = await repFactory.getRepAddress(
+        "FAT-REP",
+        community.address
+      );
+
+      const repERC20 = await ethers.getContractAt("RepERC20", repERC20Address);
+
+      expect(String(await repERC20.totalSupply())).to.equal(ethers.parseEther("0").toString());
+      expect(String(await repERC20.projectRoyaltyInBPS())).to.equal('1000');
+
+      await expect(repERC20.connect(alice).changeProjectAddress(alice.address)).to.be.rejectedWith("RepERC20: Incorrect privilege")
+      tx = await repERC20.connect(community).changeProjectAddress(bob.address);
+      receipt = await tx.wait();
+
+      const projectAddressChangeEvent = receipt?.logs.find((event) => event.eventName === "ChangedProjectAddress");
+      expect(projectAddressChangeEvent).to.exist;
+      await expect(repERC20.connect(community).changeProjectAddress(community.address)).to.be.rejectedWith("RepERC20: Incorrect privilege")
+
+    });
   });
 });
