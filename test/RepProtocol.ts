@@ -79,6 +79,42 @@ describe("HypRepProtocol", function () {
       expect(projectAddressChangeEvent).to.exist;
       await expect(repERC20.connect(community).changeProjectAddress(community.address)).to.be.rejectedWith("RepERC20: Incorrect privilege")
 
+      let prevOwnerBal = await ethers.provider.getBalance(repERC20.projectAddress());
+      let prevSystemBalance = await ethers.provider.getBalance(owner.address);
+
+      let oldAliceBal = await repERC20.balanceOf(alice.address);
+
+      tx = await repERC20.connect(alice).mint(ethers.parseEther('0'), deadline, { value: ethers.parseEther('40')});
+      receipt = await tx.wait();
+
+      const mintEvent = receipt?.logs.find((event) => event.eventName === "Mint");
+      expect(mintEvent).to.exist;
+      
+      let newOwnerBal = await ethers.provider.getBalance(repERC20.projectAddress());
+      let newSystemBalance = await ethers.provider.getBalance(owner.address);
+
+      let newAliceBal = await repERC20.balanceOf(alice.address);
+
+      expect(newOwnerBal).to.be.greaterThan(prevOwnerBal)
+      expect(newSystemBalance).to.be.greaterThan(prevSystemBalance)
+      expect(newAliceBal).to.be.greaterThan(oldAliceBal)
+
+
+      await expect(repERC20.connect(alice).mint(ethers.parseEther('100'), deadline, { value: ethers.parseEther('40')})).to.be.rejectedWith("RepERC20: Output amount does not match expectation")
+      
+      const repContractBalance = await ethers.provider.getBalance(repERC20.target);
+      const outputAmount = await repERC20.calculateSaleReturn(await repERC20.totalSupply(), repContractBalance, newAliceBal);
+
+      tx = await repERC20.connect(alice).burn(newAliceBal, ethers.parseEther('0'), deadline);
+      receipt = await tx.wait();
+
+      const burnEvent = receipt?.logs.find((event) => event.eventName === "Burn");
+      expect(burnEvent).to.exist;
+
+      const outputAmountInInt = Number(String(outputAmount));
+      const fee = (25 * outputAmountInInt) / 10000;
+
+      expect((outputAmountInInt - fee).toString()).to.be.equal(burnEvent.args[1])
     });
   });
 });
