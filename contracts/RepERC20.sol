@@ -32,8 +32,9 @@ contract RepERC20 is ERC20, IRepERC20 {
     constructor(
         uint256 _communitRoyalty,
         address payable _projectAddress,
+        string memory projectName,
         string memory projectTicker
-    ) ERC20("Rep", projectTicker) {
+    ) ERC20(projectName, projectTicker) {
         factory = IRepFactory(msg.sender);
         projectRoyaltyInBPS = _communitRoyalty;
         projectAddress = _projectAddress;

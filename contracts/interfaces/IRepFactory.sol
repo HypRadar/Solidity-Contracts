@@ -9,7 +9,7 @@ interface IRepFactory {
     function allReps(uint) external view returns (address repToken);
     function allRepsLength() external view returns (uint);
 
-    function createRep(string memory projectTicker, address projectAddress, uint256 projectRoyalty) external payable returns (address repToken);
+    function createRep(string memory projectName, string memory projectTicker, address projectAddress, uint256 projectRoyalty) external payable returns (address repToken);
     function setFeeTaker(address) external;
     function setMintingFee(uint256 newFee) external;
     function setCreationFee(uint256 newFee) external;

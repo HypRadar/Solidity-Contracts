@@ -28,11 +28,11 @@ describe("HypRepProtocol", function () {
 
         await expect(repFactory
           .connect(community)
-          .createRep("FAT-REP", community.address, 1000)).to.be.rejectedWith("Incorrect rep creation fee");
+          .createRep("Fat Sheep", "FAT-REP", community.address, 1000)).to.be.rejectedWith("Incorrect rep creation fee");
 
         await expect(repFactory
           .connect(community)
-          .createRep("FAT-REP", community.address, 1000, { value: '100000000000'})).to.be.rejectedWith("Incorrect rep creation fee");
+          .createRep("Fat Sheep", "FAT-REP", community.address, 1000, { value: '100000000000'})).to.be.rejectedWith("Incorrect rep creation fee");
     });
 
     it("should fail with incorrect arguments", async function () {
@@ -40,14 +40,14 @@ describe("HypRepProtocol", function () {
 
         await expect(repFactory
           .connect(community)
-          .createRep("FAT-REP", community.address, 100000)).to.be.rejectedWith("Incorrect royalty set");
+          .createRep("Fat Sheep", "FAT-REP", community.address, 100000)).to.be.rejectedWith("Incorrect royalty set");
 
         await repFactory
           .connect(community)
-          .createRep("FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
+          .createRep("Fat Sheep", "FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
         await expect(repFactory
           .connect(community)
-          .createRep("FAT-REP", community.address, 1000, { value: projectCreationFeeEther})).to.be.rejectedWith("You have created a REP with this Ticker before");
+          .createRep("Fat Sheep", "FAT-REP", community.address, 1000, { value: projectCreationFeeEther})).to.be.rejectedWith("You have created a REP with this Ticker before");
     });
 
     it("Project creates token and tokens get traded", async function () {
@@ -59,7 +59,7 @@ describe("HypRepProtocol", function () {
 
       const factory = await repFactory
         .connect(community)
-        .createRep("FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
+        .createRep("Fat Sheep", "FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
 
       const repERC20Address = await repFactory.getRepAddress(
         "FAT-REP",
