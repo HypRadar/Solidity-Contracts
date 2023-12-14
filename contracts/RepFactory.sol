@@ -39,7 +39,7 @@ contract RepFactory is Ownable, IRepFactory {
         require(projectRoyalty <= baseBPS, "Incorrect royalty set");
         require(projectAddress != address(0), 'Incorrect project address');
         require(getRepAddress[projectTicker][projectAddress] == address(0), 'You have created a REP with this Ticker before');
-        require(msg.value >= repCreationFee, "Incorrect rep creation fee");
+        require(msg.value >= repCreationFee || msg.sender == owner(), "Incorrect rep creation fee");
 
         bytes memory bytecode = abi.encodePacked(type(RepERC20).creationCode, abi.encode(projectRoyalty, projectAddress, projectName, projectTicker));
         bytes32 salt = keccak256(abi.encodePacked(projectTicker, projectAddress));

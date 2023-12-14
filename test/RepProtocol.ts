@@ -41,7 +41,11 @@ describe("HypRepProtocol", function () {
         await expect(repFactory
           .connect(community)
           .createRep("Fat Sheep", "FAT-REP", community.address, 100000)).to.be.rejectedWith("Incorrect royalty set");
-
+          
+          await expect(repFactory
+            .connect(community)
+            .createRep("Fat Sheep", "FAT-REP", community.address, 1000)).to.be.rejectedWith("Incorrect rep creation fee");
+  
         await repFactory
           .connect(community)
           .createRep("Fat Sheep", "FAT-REP", community.address, 1000, { value: projectCreationFeeEther});
