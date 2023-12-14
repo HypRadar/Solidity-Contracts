@@ -5,6 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IRepFactory.sol";
 import {ContinuousTokenLibrary} from "./libraries/ContinousTokenLibrary.sol";
 import {RepERC20} from "./RepERC20.sol";
+import "./interfaces/IRepERC20.sol";
 
 contract RepFactory is Ownable, IRepFactory {
     address private _feeTaker;
@@ -41,12 +42,13 @@ contract RepFactory is Ownable, IRepFactory {
         require(getRepAddress[projectTicker][projectAddress] == address(0), 'You have created a REP with this Ticker before');
         require(msg.value >= repCreationFee || msg.sender == owner(), "Incorrect rep creation fee");
 
-        bytes memory bytecode = abi.encodePacked(type(RepERC20).creationCode, abi.encode(projectRoyalty, projectAddress, projectName, projectTicker));
+        bytes memory bytecode = type(RepERC20).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(projectTicker, projectAddress));
 
         assembly {
             repToken := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
+        IRepERC20(repToken).initialize(projectRoyalty, projectAddress, projectName, projectTicker);
         getRepAddress[projectTicker][projectAddress] = repToken;
         allReps.push(repToken);
         emit RepCreated(projectTicker, projectAddress, repToken, allReps.length);

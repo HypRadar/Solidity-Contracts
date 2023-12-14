@@ -2,6 +2,13 @@
 pragma solidity ^0.8.19;
 
 interface IRepERC20 {
+    function initialize(
+        uint256 _communitRoyalty,
+        address _projectAddress,
+        string memory projectName,
+        string memory projectTicker
+    ) external;
+
     function mint(
         uint amountOutMin,
         uint deadline

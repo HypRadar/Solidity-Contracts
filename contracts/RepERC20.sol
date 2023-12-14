@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.19;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {BaseERC20} from "./BaseERC20.sol";
 import {ContinuousTokenLibrary} from "./libraries/ContinousTokenLibrary.sol";
 import "./interfaces/IRepERC20.sol";
 import "./interfaces/IRepFactory.sol";
 import "hardhat/console.sol";
 
-contract RepERC20 is ERC20, IRepERC20 {
+contract RepERC20 is BaseERC20, IRepERC20 {
     IRepFactory public factory;
     address payable public projectAddress;
     uint256 public projectRoyaltyInBPS;
@@ -29,15 +29,20 @@ contract RepERC20 is ERC20, IRepERC20 {
         _;
     }
 
-    constructor(
-        uint256 _communitRoyalty,
-        address payable _projectAddress,
-        string memory projectName,
-        string memory projectTicker
-    ) ERC20(projectName, projectTicker) {
+    constructor() {
         factory = IRepFactory(msg.sender);
+    }
+
+    // called once by the factory at time of deployment
+    function initialize(uint256 _communitRoyalty,
+        address _projectAddress,
+        string memory projectName,
+        string memory projectTicker) external override {
+        require(msg.sender == address(factory), "Incorrect previlege");
+
         projectRoyaltyInBPS = _communitRoyalty;
-        projectAddress = _projectAddress;
+        projectAddress = payable(_projectAddress);
+        _initializeERC20(projectName, projectTicker);
     }
 
     function calculatePurchaseReturn(

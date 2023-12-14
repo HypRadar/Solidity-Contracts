@@ -1,12 +1,20 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const kleosFactory = await ethers.deployContract("KleosFactory", []);
+  const mintingFeeInBPS = "25"; // 0.25%
+  const projectCreationFeeEther = ethers.parseEther("0.41"); // 410000000000000000 wei
 
-  await kleosFactory.waitForDeployment();
+  const repFactory = await ethers.deployContract("RepFactory", [mintingFeeInBPS, projectCreationFeeEther]);
+  const repERC20 = await ethers.deployContract("RepERC20", []);
+
+  await repFactory.waitForDeployment();
+  await repERC20.waitForDeployment();
 
   console.log(
-    `Kleos Factory contract deployed to ${kleosFactory.target}`
+    `Rep Factory contract deployed to ${repFactory.target}`
+  );
+  console.log(
+    `Rep ERC20 contract deployed to ${repERC20.target}`
   );
 }
 
